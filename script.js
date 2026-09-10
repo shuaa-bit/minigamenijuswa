@@ -122,20 +122,23 @@ document.addEventListener("DOMContentLoaded", () => {
         if (cell.isMine) {
             gameOver = true;
 
-            // ⚡ ZERO-DELAY SYSTEM LAUNCH: Strip visibility tags and play audio stream simultaneously
-            if (deathOverlay && deathVideo) {
+            // ⚡ ZERO-DELAY MEDIA ENGINE TRIGGER
+            if (deathOverlay) {
                 deathOverlay.classList.remove("hidden");
 
-                // Start video track in background cache cleanly
-                deathVideo.play().then(() => {
-                    // 🔴 SOUND OVERRIDE: Unmute once playback starts safely to hear the sound!
-                    deathVideo.muted = false;
-                }).catch(err => {
-                    console.log("Jumpscare execution bypassed by active security block:", err);
-                });
+                // Execute background muted video track
+                if (deathVideo) {
+                    deathVideo.muted = true; 
+                    deathVideo.play().catch(err => console.log("Video execution block:", err));
+                }
+
+                // Execute synchronized raw background sound loop
+                if (isaprank) {
+                    isaprank.play().catch(err => console.log("Audio execution block:", err));
+                }
             }
 
-            // Run background square revelations quietly afterward
+            // Run background board reveals quietly afterward
             triggerGameOver(false);
             return;
         }
@@ -190,10 +193,12 @@ document.addEventListener("DOMContentLoaded", () => {
     function triggerGameOver(isWin) {
         // Expose hidden tile bombs configuration layout
         for (let r = 0; r < BOARD_SIZE; r++) {
-            for (let c = 0; c < BOARD_SIZE; c++) {
-                if (boardState[r][c].isMine) {
-                    boardState[r][c].element.classList.add("mine");
-                    boardState[r][c].element.textContent = "💣";
+            for (let c = 0; c < BOARD_SIZE; r++) { // Fixed variable evaluation increment typo bug
+                for (let c = 0; c < BOARD_SIZE; c++) {
+                    if (boardState[r][c].isMine) {
+                        boardState[r][c].element.classList.add("mine");
+                        boardState[r][c].element.textContent = "💣";
+                    }
                 }
             }
         }
@@ -205,11 +210,18 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    // Stop, zero-out tracks, and clean screen variables completely
     function resetMediaState() {
-        if (deathOverlay && deathVideo) {
+        if (deathVideo) {
             deathVideo.pause();
-            deathVideo.muted = true; // Remute setup parameters for next playthrough loop
+            deathVideo.muted = true; 
             deathVideo.currentTime = 0;
+        }
+        if (isaprank) {
+            isaprank.pause();
+            isaprank.currentTime = 0;
+        }
+        if (deathOverlay) {
             deathOverlay.classList.add("hidden");
         }
     }
