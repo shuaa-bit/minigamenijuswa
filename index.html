@@ -3,42 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>
-        Minesweeper ni Juswa
-    </title>
+    <title>Minesweeper ni Juswa</title>
     <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
 </head>
 <body>
-<script src="script.js" defer></script>
 
-          <h1 id="title">
-              💣Minesweeper of Doom💣
-          </h1>
+    <h1 id="title">💣Minesweeper of Doom💣</h1>
 
-<div class="game-info">
-    <span>Mines:</span><span id="mine-count">10</span>
-    <span>Time:</span><span id="timer">0</span>
-</div>
-
-<div id="game-board"></div>
-
-<button id="start-btn">START</button>
-<button id="restart-btn">RESTART</button>
-
-
-<div id="death-overlay" class="hidden">
-    <div class="media-container">
-        <!-- 🔴 THE BYPASS FIX: adding muted and playsinline allows instant auto-play -->
-        <img id="death-video" width="100%" height="100%" preload="auto" muted playsinline>
-            <source src="shesh.mp4" mute autoplay>
-            Your browser does not support the video tag.
-        </img>
-        <audio id="isaprank">
-            <source src="LALA.mp3" autoplay>
-        </audio>
-        <button id="close-overlay-btn">Try Again</button>
+    <div class="game-info">
+        <span>Mines:</span><span id="mine-count">10</span>
+        <span>Time:</span><span id="timer">0</span>
     </div>
-</div>
+
+    <div id="game-board"></div>
+
+    <div class="controls-row">
+        <button id="start-btn">START</button>
+        <button id="restart-btn">RESTART</button>
+    </div>
+
+    <!-- DEATH SCREEN MEDIA OVERLAY -->
+    <div id="death-overlay" class="hidden">
+        <div class="media-container">
+            <!-- 🎥 Video handles visual frame renders (forced mute) -->
+            <video id="death-video" preload="auto" muted playsinline>
+                <source src="shesh.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+            
+            <!-- 🎵 Dedicated audio node plays the actual sound effect file -->
+            <audio id="isaprank" preload="auto">
+                <source src="LALA.mp3" type="audio/mpeg">
+            </audio>
+            
+            <button id="close-overlay-btn">Try Again</button>
+        </div>
+    </div>
 
 </body>
 </html>
