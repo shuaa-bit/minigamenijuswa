@@ -9,9 +9,15 @@ document.addEventListener("DOMContentLoaded", () => {
     let gameOver = false;
     let cellsRevealed = 0;
 
+    // --- TIMER SYSTEM TRACKING ---
+    let timerInterval = null;
+    let timeElapsed = 0;
+    let isFirstClick = true; // Timer starts on the player's first move
+
     // --- DOM ELEMENT SELECTORS ---
     const boardElement = document.getElementById("game-board");
     const mineCountDisplay = document.getElementById("mine-count");
+    const timerDisplay = document.getElementById("timer");
     const startBtn = document.getElementById("start-btn");
     const restartBtn = document.getElementById("restart-btn");
 
@@ -40,6 +46,12 @@ document.addEventListener("DOMContentLoaded", () => {
         gameOver = false;
         cellsRevealed = 0;
         mineCountDisplay.textContent = TOTAL_MINES;
+
+        // Reset and clear the running timer
+        stopTimer();
+        timeElapsed = 0;
+        timerDisplay.textContent = "0";
+        isFirstClick = true;
 
         resetMediaState();
 
@@ -77,6 +89,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // 3. Compile Proximity Metrics
         calculateNeighborValues();
+    }
+
+    // --- TIMER CONTROLS ---
+    function startTimer() {
+        if (timerInterval) return; // Prevent multiple intervals from spawning
+        timerInterval = setInterval(() => {
+            timeElapsed++;
+            timerDisplay.textContent = timeElapsed;
+        }, 1000);
+    }
+
+    function stopTimer() {
+        if (timerInterval) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
     }
 
     function generateMines() {
@@ -118,27 +146,31 @@ document.addEventListener("DOMContentLoaded", () => {
         const cell = boardState[r][c];
         if (cell.isRevealed || cell.isFlagged) return;
 
+        // Start the timer cleanly on the user's first move
+        if (isFirstClick) {
+            isFirstClick = false;
+            startTimer();
+        }
+
         // Hit a mine -> TRIGGER THE JUMPSCARE INSTANTLY
         if (cell.isMine) {
             gameOver = true;
+            stopTimer(); // Freeze the clock immediately
 
             // ⚡ ZERO-DELAY MEDIA ENGINE TRIGGER
             if (deathOverlay) {
                 deathOverlay.classList.remove("hidden");
 
-                // Execute background muted video track
                 if (deathVideo) {
                     deathVideo.muted = true; 
                     deathVideo.play().catch(err => console.log("Video execution block:", err));
                 }
 
-                // Execute synchronized raw background sound loop
                 if (isaprank) {
                     isaprank.play().catch(err => console.log("Audio execution block:", err));
                 }
             }
 
-            // Run background board reveals quietly afterward
             triggerGameOver(false);
             return;
         }
@@ -147,6 +179,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Win Condition
         if (cellsRevealed === (BOARD_SIZE * BOARD_SIZE) - TOTAL_MINES) {
+            gameOver = true;
+            stopTimer(); // Stop clock at your winning time
             triggerGameOver(true);
         }
     }
@@ -182,6 +216,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const cell = boardState[r][c];
         if (cell.isRevealed) return;
 
+        // Start timer on flag placement if they haven't left-clicked yet
+        if (isFirstClick) {
+            isFirstClick = false;
+            startTimer();
+        }
+
         cell.isFlagged = !cell.isFlagged;
         cell.element.classList.toggle("flagged");
         cell.element.textContent = cell.isFlagged ? "🚩" : "";
@@ -193,24 +233,21 @@ document.addEventListener("DOMContentLoaded", () => {
     function triggerGameOver(isWin) {
         // Expose hidden tile bombs configuration layout
         for (let r = 0; r < BOARD_SIZE; r++) {
-            for (let c = 0; c < BOARD_SIZE; r++) { // Fixed variable evaluation increment typo bug
-                for (let c = 0; c < BOARD_SIZE; c++) {
-                    if (boardState[r][c].isMine) {
-                        boardState[r][c].element.classList.add("mine");
-                        boardState[r][c].element.textContent = "💣";
-                    }
+            for (let c = 0; c < BOARD_SIZE; c++) {
+                if (boardState[r][c].isMine) {
+                    boardState[r][c].element.classList.add("mine");
+                    boardState[r][c].element.textContent = "💣";
                 }
             }
         }
 
         if (isWin) {
             setTimeout(() => {
-                alert("🎉 Victory achieved!");
+                alert(`🎉 Victory achieved in ${timeElapsed} seconds!`);
             }, 300);
         }
     }
 
-    // Stop, zero-out tracks, and clean screen variables completely
     function resetMediaState() {
         if (deathVideo) {
             deathVideo.pause();
