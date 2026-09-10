@@ -19,6 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const deathOverlay = document.getElementById("death-overlay");
     const deathVideo = document.getElementById("death-video");
     const closeOverlayBtn = document.getElementById("close-overlay-btn");
+    const isaprank = document.getElementById("isaprank");
 
     // --- EVENT LISTENERS ---
     startBtn.addEventListener("click", initializeGame);
